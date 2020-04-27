@@ -137,4 +137,10 @@ nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
 
 """---------------------
+"""---- Automation -----
+
+" Remove all trailing spaces on save
+autocmd BufWritePre * %s/\s\+$//e
+
+"""---------------------
 
