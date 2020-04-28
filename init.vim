@@ -40,6 +40,12 @@ Plug 'drewtempelmeyer/palenight.vim'
 " Comment/uncomment row
 Plug 'preservim/nerdcommenter'
 
+" Git command inside Vim
+Plug 'tpope/vim-fugitive'
+
+" Search in project
+Plug 'ctrlpvim/ctrlp.vim'
+
 call plug#end()
 
 """---------------------
@@ -60,6 +66,9 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 let g:NERDTreeDirArrowExpandable = ''
 let g:NERDTreeDirArrowCollapsible = ''
 
+" Remove 'Press ? for help'
+let NERDTreeMinimalUI = 1
+
 """---------------------
 """------- Git  --------
 
@@ -76,6 +85,12 @@ let g:NERDTreeIndicatorMapCustom = {
     \ "Ignored"   : "☒",
     \ "Unknown"   : "?"
     \ }
+
+"""---------------------
+"""----- Fugitive ------
+
+""" Set Gdiff to vertical
+:set diffopt+=vertical
 
 """---------------------
 """----- Dev icons -----
@@ -114,6 +129,15 @@ if (has("termguicolors"))
 endif
 
 """---------------------
+"""------ CtrlP --------
+
+" Ignore some files and folders
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/](site\-packages|node_modules|__pycache__)|(\.(git|hg|svn))$',
+  \ 'file': '\v\.(pyc|exe|so|dll)$',
+  \ }
+
+"""---------------------
 """------ Theme --------
 
 set background=dark
@@ -136,6 +160,17 @@ nmap <C-n> :NERDTreeToggle<CR>
 nmap <C-_> <plug>NERDCommenterToggle
 vmap <C-_> <plug>NERDCommenterToggle
 
+" Switch between different windows by their direction
+no <C-j> <C-w>j| "switching to below window
+no <C-k> <C-w>k| "switching to above window
+no <C-l> <C-w>l| "switching to right window
+no <C-h> <C-w>h| "switching to left window
+
+" Map Ctrl + P to search for files in current directory,
+" where current directory is NERDTree Root (if available) or cwd
+let g:ctrlp_map = 0
+nmap <C-p> :CtrlP GetCwd()<CR>
+
 """---------------------
 """---- Automation -----
 
@@ -143,4 +178,11 @@ vmap <C-_> <plug>NERDCommenterToggle
 autocmd BufWritePre * %s/\s\+$//e
 
 """---------------------
+function GetCwd()
+  if exists('g:NERDTree')
+    return g:NERDTree.ForCurrentTab().getRoot().path.str()
+  else
+    return getcwd()
+  endif
+endfunction
 
