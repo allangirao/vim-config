@@ -165,8 +165,12 @@ set colorcolumn=80
 """---------------------
 """----- Commands ------
 
-" Close current buffer
-command! Q :call CloseCurrentBuffer(0)
+" Replicates command w for W
+command! -bang -range=% -complete=file -nargs=* W <line1>,<line2>write<bang> <args>
+
+" Close current buffer (saving or not, forcing quit or not)
+command! -bang Q :call CloseCurrentBuffer(<bang>0, 0)
+command! -bang WQ :call CloseCurrentBuffer(<bang>0, 1)
 
 """---------------------
 """---- Shortcuts ------
@@ -235,19 +239,34 @@ function! GetCwd()
   endif
 endfunction
 
-function! CloseCurrentBuffer(force)
-  let current_buff = bufnr("%")
-  let is_modified = &mod
-  if a:force
-    exe 'bd! '.current_buff | bp
-  elseif is_modified
-    " Improve to look like natural quit command
-    echo 'Your file has unsaved changes'
-  else
-      exe 'bp'
-      exe 'bd '.current_buff
+
+function! PrintError(msg, prompt)
+  echohl ErrorMsg | echo a:msg | echohl None
+  if a:prompt
+    echohl Question | echo "" | echohl None
   endif
-  "
+endfunction
+
+function! CloseCurrentBuffer(force, save)
+  let curbuf = bufnr("%")
+  let lastbuf = bufnr("$")
+  let mvbuf = curbuf == lastbuf ? "bp" : "bn"
+  if &mod
+    if a:save
+      if (&readonly && !a:force)
+        call PrintError("'readonly' option is set (add ! to override)", 0)
+      else
+        exe 'w!' | exe mvbuf | exe 'bd! '.curbuf
+      endif
+    elseif a:force
+      exe mvbuf | exe 'bd! '.curbuf
+    else
+      let curbufname = bufname("%")
+      call PrintError("No write since last change for buffer \"".curbufname."\"", 1)
+    endif
+  else
+    exe mvbuf | exe 'bd '.curbuf
+  endif
 endfunction
 
 function! NextBuf()
