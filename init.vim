@@ -66,6 +66,7 @@ Plug 'ctrlpvim/ctrlp.vim'
 
 " Autocomplete
 " Plug 'valloric/youcompleteme'
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 Plug 'vim-airline/vim-airline'
 
@@ -169,8 +170,8 @@ set colorcolumn=80
 command! -bang -range=% -complete=file -nargs=* W <line1>,<line2>write<bang> <args>
 
 " Close current buffer (saving or not, forcing quit or not)
-command! -bang Q :call CloseCurrentBuffer(<bang>0, 0)
-command! -bang WQ :call CloseCurrentBuffer(<bang>0, 1)
+command! -count=1 -bang Q :call CloseBuffer(<bang>0, 0, <count>)
+command! -count=1 -bang WQ :call CloseBuffer(<bang>0, 1, <count>)
 
 """---------------------
 """---- Shortcuts ------
@@ -245,6 +246,14 @@ function! PrintError(msg, prompt)
   if a:prompt
     echohl Question | echo "" | echohl None
   endif
+endfunction
+
+function! CloseBuffer(force, save, times)
+  let c = 1
+  while c <= a:times
+    call CloseCurrentBuffer(a:force, a:save)
+    let c += 1
+  endwhile
 endfunction
 
 function! CloseCurrentBuffer(force, save)
